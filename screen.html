@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>이미지 캡쳐 공장</title>
+    <!-- <link rel="stylesheet" href="styles.css" /> -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // 1. JSON 파일명을 변수로 지정
+      const jsonFileName = '프랑스.json';
+
+      // 2. ttj 카페 닉네임 입력
+      const ttjName = '뚜더제이조앙';
+    </script>
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="logo" id="logo-name"></div>
+      </nav>
+    </header>
+
+    <!-- 메인 섹션 -->
+    <main>
+      <!-- 헤더 이미지 -->
+      <div id="header">
+        <div class="header-row">
+          <div class="header-img" id="header-img-1"></div>
+          <div class="header-img" id="header-img-2"></div>
+        </div>
+        <div class="header-row">
+          <div class="header-img" id="header-img-3"></div>
+          <div class="header-img" id="header-img-4"></div>
+        </div>
+        <div id="header-text"></div>
+      </div>
+
+      <!-- 이미지 갤러리 -->
+      <div id="image-gallery"></div>
+    </main>
+
+    <footer>
+      <p id="footer-text"></p>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', async function () {
+        console.log(jsonFileName);
+        // 스타일시트 파일 목록
+        const stylesheets = ['styles.css', 'styles2.css', 'styles3.css'];
+
+        // 랜덤으로 하나의 스타일시트 선택
+        const selectedStylesheet =
+          stylesheets[Math.floor(Math.random() * stylesheets.length)];
+
+        // link 요소 생성 및 속성 설정
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = selectedStylesheet;
+
+        // head 태그에 link 요소 추가
+        document.head.appendChild(link);
+        // 로고 이름 설정
+        document.getElementById('logo-name').textContent = ttjName;
+        // 푸터 텍스트를 HTML로 설정
+        document.getElementById(
+          'footer-text'
+        ).innerHTML = `&copy; 2024TTJ 동생 ${ttjName}`;
+        // JSON 파일에서 호텔 데이터를 로드합니다.
+        const response = await fetch(jsonFileName);
+        const hotelsData = await response.json();
+
+        // 'screen' 키가 없는 호텔만 필터링하고 랜덤으로 하나를 선택
+        const hotelsWithoutScreen = hotelsData.filter(
+          (hotel) => hotel.screen === undefined
+        );
+        const randomHotel =
+          hotelsWithoutScreen[
+            Math.floor(Math.random() * hotelsWithoutScreen.length)
+          ];
+
+        // sanitizeFolderName 함수를 HTML에 추가
+        function sanitizeFolderName(name, isCityName = false) {
+          let processedName = name;
+          processedName = processedName.replace(/:/g, ''); // 콜론 삭제
+          processedName = processedName.replace(/\./g, ''); // 점 삭제
+          processedName = processedName.replace(/\\/g, '-'); // 역슬래시를 - 로 변경
+
+          if (isCityName) {
+            processedName = processedName
+              .replace(/\s/g, '')
+              .replace(/\//g, '-');
+          } else {
+            processedName = processedName
+              .replace(/\s/g, '-')
+              .replace(/\//g, '-');
+          }
+          return processedName.replace(/-+/g, '-');
+        }
+
+        // 로컬 스토리지에 저장하기 전에 sanitizeFolderName 함수를 사용하여 이름을 정리
+        localStorage.setItem(
+          'selectedCountry',
+          sanitizeFolderName(randomHotel.country)
+        );
+        localStorage.setItem(
+          'selectedCity',
+          sanitizeFolderName(randomHotel.city, true)
+        );
+        localStorage.setItem(
+          'selectedHotelName',
+          sanitizeFolderName(randomHotel.hotel_translated_name)
+        );
+        localStorage.setItem('currentHotelId', randomHotel.hotel_id.toString());
+
+        // 호텔 ID를 header 요소의 data 속성으로 추가합니다.
+        document
+          .getElementById('header')
+          .setAttribute('data-hotel-id', randomHotel.hotel_id);
+
+        // 각 사진의 src와 alt를 포함하는 photoData를 생성합니다.
+        const photoData = Object.keys(randomHotel)
+          .filter(
+            (key) =>
+              key.startsWith('photo') &&
+              randomHotel[key] &&
+              randomHotel[key].src
+          )
+          .map((key) => ({
+            src: randomHotel[key].src,
+            alt: randomHotel[key].alt || '호텔 이미지', // alt 텍스트가 없는 경우 기본 텍스트 사용
+          }));
+
+        // 헤더에 사용할 4개의 사진을 랜덤으로 선택합니다.
+        let selectedPhotos =
+          photoData.length >= 4
+            ? photoData.sort(() => 0.5 - Math.random()).slice(0, 4)
+            : photoData;
+
+        // 헤더 이미지를 설정합니다.
+        selectedPhotos.forEach((photo, index) => {
+          const imgElement = document.getElementById(`header-img-${index + 1}`);
+          if (imgElement) {
+            imgElement.style.backgroundImage = `url('${photo.src}')`;
+            imgElement.style.backgroundSize = 'cover';
+            imgElement.style.backgroundPosition = 'center';
+          }
+        });
+
+        // 이미지 갤러리에 img 태그로 이미지를 추가합니다.
+        const galleryElement = document.getElementById('image-gallery');
+        photoData.forEach((photo) => {
+          // 이미지 컨테이너 생성
+          const imageContainer = document.createElement('div');
+          imageContainer.className = 'image-container';
+
+          // 이미지 태그 생성
+          const imgTag = document.createElement('img');
+          imgTag.src = photo.src;
+          imgTag.alt = photo.alt;
+          imageContainer.appendChild(imgTag);
+
+          // 중앙 텍스트 추가
+          const centerText = document.createElement('div');
+          centerText.className = 'centered-text';
+          centerText.textContent = 'TRIP JOA STORY';
+          imageContainer.appendChild(centerText);
+
+          // 오른쪽 하단 텍스트 추가 (호텔 이름, 도시, 국가)
+          const bottomRightText = document.createElement('div');
+          bottomRightText.className = 'bottom-right-text';
+          bottomRightText.innerHTML = `${randomHotel.country} <br> ${randomHotel.hotel_translated_name}`;
+          imageContainer.appendChild(bottomRightText);
+
+          // 컨테이너를 갤러리에 추가
+          galleryElement.appendChild(imageContainer);
+        });
+
+        // 다양한 headerText 옵션들
+        let headerTextOptions = [
+          `${randomHotel.country}<br>${randomHotel.city}<br>${randomHotel.hotel_name}`,
+          `${randomHotel.city}<br>${randomHotel.hotel_name}`,
+          `커플<br>${randomHotel.city}<br>${randomHotel.hotel_name}`,
+          `여유<br>${randomHotel.city}<br>${randomHotel.hotel_name}`,
+          `${randomHotel.city}, ${randomHotel.country}`,
+          `최고급<br>${randomHotel.city}`,
+          `휴가<br>${randomHotel.city}<br>${randomHotel.hotel_name}`,
+          `가족 여행<br>${randomHotel.city}`,
+          `중심부<br>${randomHotel.hotel_name}`,
+          `아름다운<br>${randomHotel.city}, ${randomHotel.country}`,
+          `비즈니스<br>${randomHotel.city}`,
+          `역사<br>${randomHotel.city}`,
+          `모던<br>${randomHotel.city}`,
+          `맛집<br>${randomHotel.city}`,
+          `특별한 밤<br>${randomHotel.city}`,
+          `자연<br>${randomHotel.city}`,
+          `럭셔리<br>${randomHotel.city}`,
+          `활기찬<br>${randomHotel.city}`,
+          `친절한 서비스<br>${randomHotel.city}`,
+          `편안함<br>${randomHotel.city}`,
+          `휴식처<br>${randomHotel.city}`,
+          `숨겨진 보석<br>${randomHotel.city}<br>${randomHotel.hotel_name}`,
+          `도시 탐험<br>${randomHotel.city}`,
+          `예술<br>${randomHotel.city}`,
+          `전통적인<br>${randomHotel.city}`,
+          `현대적인<br>${randomHotel.hotel_name}`,
+          `멋진 경치<br>${randomHotel.city}`,
+          `고급 스파<br>${randomHotel.city}`,
+          `쇼핑 천국<br>${randomHotel.city}`,
+          `문화 탐방<br>${randomHotel.city}`,
+          `또 가고싶은<br>${randomHotel.city}`,
+          `아늑한<br>${randomHotel.city}<br>${randomHotel.hotel_name}`,
+          `전망 좋은<br>${randomHotel.city}`,
+          `로맨틱<br>${randomHotel.city}`,
+          `스포츠 시설<br>${randomHotel.city}`,
+          `에코 프렌들리<br>${randomHotel.city}`,
+          `엔터테인먼트<br>${randomHotel.city}`,
+          `조용한<br>${randomHotel.city}`,
+          `도심 속<br>${randomHotel.city}`,
+          `가성비 최고<br>${randomHotel.city}`,
+        ];
+
+        // 'children' 키 확인
+        if (randomHotel.children) {
+          let headerTextOptions = [
+            `어린이 시설<br>${randomHotel.country}`,
+            `가족 여행<br>${randomHotel.country}<br>${randomHotel.hotel_name}`,
+            `어린이 환영<br>${randomHotel.city}`,
+            `가족 선택<br>${randomHotel.hotel_name}, ${randomHotel.city}`,
+            `놀이터<br>${randomHotel.hotel_name}`,
+            `아이 최적화<br>${randomHotel.hotel_name}, ${randomHotel.city}`,
+            `행복한 순간<br>${randomHotel.city}`,
+            `특별 편의<br>${randomHotel.hotel_name}, ${randomHotel.city}`,
+            `가족 친화<br>${randomHotel.city} ${randomHotel.hotel_name}`,
+            `가족 즐거움<br>${randomHotel.hotel_name}, ${randomHotel.city}`,
+            `어린이 사랑<br>${randomHotel.city}`,
+            `가족 모험<br>${randomHotel.hotel_name}`,
+            `즐거운 숙소<br>${randomHotel.city}`,
+            `가족 추억<br>${randomHotel.country}`,
+            `아이와 여행<br>${randomHotel.hotel_name}`,
+            `가족의 선택<br>${randomHotel.city}`,
+            `어린이 파라다이스<br>${randomHotel.hotel_name}`,
+            `가족 휴식<br>${randomHotel.city} ${randomHotel.hotel_name}`,
+            `어린이 친화<br>${randomHotel.country}`,
+            `가족 매력<br>${randomHotel.hotel_name}, ${randomHotel.city}`,
+          ];
+        }
+        // '피트니스' 키워드 확인
+        else if (
+          randomHotel.activities &&
+          randomHotel.activities.includes('피트니스')
+        ) {
+          let headerTextOptions = [
+            `피트니스 센터<br>${randomHotel.city}`,
+            `운동 필수<br>${randomHotel.city}`,
+            `건강 여행<br>${randomHotel.city}`,
+            `피트니스+휴식<br>${randomHotel.city}`,
+            `운동 시간<br>${randomHotel.hotel_name}`,
+            `활기찬 여행<br>${randomHotel.city}`,
+            `운동 유지<br>${randomHotel.city}`,
+            `건강한 숙박<br>${randomHotel.hotel_name}`,
+            `운동 enthusiast<br>${randomHotel.city}`,
+            `모던 피트니스<br>${randomHotel.hotel_name}`,
+            `피트니스 꿈<br>${randomHotel.city}`,
+            `헬스장 완비<br>${randomHotel.hotel_name}`,
+            `운동하며 여행<br>${randomHotel.city}`,
+            `피트니스 휴가<br>${randomHotel.hotel_name}`,
+            `건강 유지<br>${randomHotel.city}`,
+            `헬스 좋아?<br>${randomHotel.city}`,
+            `피트니스 천국<br>${randomHotel.hotel_name}`,
+            `운동 마니아<br>${randomHotel.city}`,
+            `피트니스 모험<br>${randomHotel.hotel_name}`,
+            `헬스장 필수<br>${randomHotel.city}`,
+          ];
+        }
+        // '반려동물' 키워드 확인
+        else if (randomHotel.entry && randomHotel.entry.includes('반려동물')) {
+          let headerTextOptions = [
+            `반려동물 OK<br>${randomHotel.country}`,
+            `댕댕이 동반<br>${randomHotel.city}`,
+            `고양이 가능<br>${randomHotel.country}`,
+            `강아지 여행<br>${randomHotel.city}`,
+            `특별한 반려동물 여행<br>${randomHotel.hotel_name}`,
+            `편안한 숙소<br>${randomHotel.city}`,
+            `친환경 반려동물 호텔<br>${randomHotel.city}`,
+            `아름다운 시간<br>${randomHotel.hotel_name}`,
+            `완벽한 선택<br>${randomHotel.city}`,
+            `귀여운 친구와<br>${randomHotel.country}`,
+            `반려동물 환영<br>${randomHotel.city}`,
+            `함께하는 숙박<br>${randomHotel.hotel_name}`,
+            `반려동물과 여행<br>${randomHotel.city}`,
+            `사랑받는 반려동물<br>${randomHotel.country}`,
+            `동반 입장<br>${randomHotel.hotel_name}`,
+            `여행의 동반자<br>${randomHotel.city}`,
+            `동물 친구<br>${randomHotel.country}`,
+            `함께하는 휴가<br>${randomHotel.city}`,
+            `반려동물과 숙박<br>${randomHotel.hotel_name}`,
+            `반려동물 동행<br>${randomHotel.city}`,
+          ];
+        }
+
+        // 랜덤으로 하나의 headerText를 선택합니다.
+        const headerText =
+          headerTextOptions[
+            Math.floor(Math.random() * headerTextOptions.length)
+          ];
+        document.getElementById('header-text').innerHTML = headerText;
+      });
+    </script>
+  </body>
+</html>

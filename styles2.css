@@ -1,0 +1,167 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* 중앙 정렬에서 상단 정렬로 변경 */
+  min-height: 100vh;
+}
+header {
+  margin-top: 25px;
+  background-color: #f5f5f5;
+  padding: 10px 20px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.nav-links li {
+  padding: 0 15px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: #007bff;
+}
+h1 {
+  font-weight: 700;
+  text-align: center;
+  margin: 20px 0;
+}
+
+#header {
+  margin-top: 25px;
+  width: 550px; /* 고정 너비 */
+  height: 550px; /* 고정 높이 */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2개의 열 */
+  grid-template-rows: repeat(2, 1fr); /* 2개의 행 */
+  position: relative;
+  grid-gap: 2px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header-img {
+  background-position: center;
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+  border: 5px solid gold;
+  filter: brightness(110%) contrast(120%); /* 화사한 필터 적용 */
+}
+
+/* Specific IDs for different images */
+#header-img-1 {
+  background-image: url('path_to_your_image1.jpg');
+}
+#header-img-2 {
+  background-image: url('path_to_your_image2.jpg');
+}
+#header-img-3 {
+  background-image: url('path_to_your_image3.jpg');
+}
+#header-img-4 {
+  background-image: url('path_to_your_image4.jpg');
+}
+
+#header-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: gold; /* Light background for readability */
+  color: black; /* A bold, contrasting color */
+  font-weight: bold;
+  padding: 10px; /* Add some padding around the text */
+  border-radius: 5px; /* Optional, for rounded corners */
+  font-size: 20px;
+  text-align: center;
+  z-index: 10;
+}
+
+/* 단일 이미지*/
+
+/* 이미지 갤러리 스타일링 */
+#image-gallery {
+  width: auto; /* 갤러리 너비를 자동으로 설정 */
+  margin: 20px; /* 상하좌우 여백 */
+  display: flex; /* Flexbox 사용 */
+  flex-wrap: wrap; /* 이미지가 여러 줄로 감싸질 수 있게 설정 */
+  justify-content: center; /* 세로 축 중앙 정렬 */
+  gap: 20px; /* 이미지 사이 간격 */
+}
+
+/* 각 이미지 컨테이너의 스타일링 */
+.image-container {
+  width: 800px; /* 너비 설정 */
+  height: 600px; /* 높이 설정 */
+  position: relative; /* 중앙 및 하단 텍스트 위치 설정 */
+}
+
+/* 이미지 태그 스타일링 */
+.image-container img {
+  width: 100%; /* 이미지 너비를 컨테이너에 맞춤 */
+  height: 100%; /* 이미지 높이를 컨테이너에 맞춤 */
+  object-fit: cover; /* 이미지를 컨테이너에 맞게 자르거나 늘림 */
+  border-radius: 5px; /* 이미지 모서리 둥글게 */
+  border: 5px solid gold;
+  filter: brightness(110%) contrast(120%); /* 화사한 필터 적용 */
+}
+
+.centered-text,
+.bottom-right-text {
+  position: absolute;
+  color: black;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.centered-text {
+  display: none;
+}
+
+.bottom-right-text {
+  right: 10px;
+  bottom: 10px;
+  font-size: 15px;
+  background-color: gold; /* 반투명 파란색 배경 */
+}
+
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  border-radius: 5px;
+  margin: 30px 0;
+  padding: 0 15px;
+}
+
+footer p {
+  margin: 0;
+  font-size: 16px;
+}
